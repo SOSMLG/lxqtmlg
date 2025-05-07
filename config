@@ -2,7 +2,7 @@ set $mod Mod4
 font pango:monospace 10
 
 #Removing Title
-for_window [class="^.*"] border pixel 0
+for_window [class="^.*"] border pixel 2.5
 
 #Gaps 
 gaps inner 5
@@ -104,6 +104,24 @@ bindsym $mod+Shift+0 move container to workspace number $ws10
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'Exit i3? This ends your session.' -B 'Yes, exit i3' 'i3-msg exit'"
+
+# Classy, calm, pastel-inspired i3wm color scheme
+
+# Base colors
+set $bg-color           #1F1B24    
+set $inactive-bg        #2E2633    
+set $text-color         #F0ECEB    
+set $inactive-text      #A49BAA    
+set $highlight          #7B69A1    
+set $focused-border     #A9C4E2    
+set $urgent-border      #E6A1CB
+
+# i3 colors
+client.focused          $highlight $highlight $text-color $highlight $text-color
+client.unfocused        $inactive-bg $inactive-bg $inactive-text $inactive-bg $inactive-text
+client.focused_inactive $inactive-bg $inactive-bg $inactive-text $inactive-bg $inactive-text
+client.urgent           $urgent-border $urgent-border $text-color $urgent-border $text-color
+client.placeholder      $bg-color $bg-color $text-color $bg-color $text-color
 
 # Remove i3bar to let LXQt panel handle the status bar
 # (commented out or deleted entirely)
