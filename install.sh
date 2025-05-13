@@ -15,7 +15,6 @@ sudo apt install --no-install-recommends -y \
     fonts-terminus \
     fonts-noto-color-emoji \
     unzip \
-    curl \
     fzf \
     micro \
     shotcut
@@ -88,3 +87,8 @@ cp qterminal.ini ~/.config/qterminal.org/qterminal.ini
 cp SoftTwilight.colorscheme ~/.config/qterminal.org/color-schemes/SoftTwilight.colorscheme
 
 echo "Clean Terminal Installed :D"
+echo "Installing Oh My Bash"
+bash -c "$(wget https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh -O -)"
+cp .bashrc ~/.bashrc
+echo "Everything is Ready Time To reboot"
+sudo reboot
