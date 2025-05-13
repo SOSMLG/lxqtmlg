@@ -1,11 +1,15 @@
 #!/bin/bash
-
 set -e
 
-echo "==> Updating package lists..."
+# Function to print a heading
+print_section() {
+    echo -e "\n\033[1;32m==> $1\033[0m"
+}
+
+print_section "Updating package lists"
 sudo apt update
 
-echo "==> Installing essential packages (no recommends)..."
+print_section "Installing essential packages (no recommends)"
 sudo apt install --no-install-recommends -y \
     i3-wm \
     eza \
@@ -15,36 +19,26 @@ sudo apt install --no-install-recommends -y \
     fonts-terminus \
     fonts-noto-color-emoji \
     unzip \
+    curl \
     fzf \
     micro \
     shotcut
-    
-sudo apt purge nano 
-sudo apt autoremove
 
-echo "==> Creating fonts directory..."
-mkdir -p ~/.local/share/fonts
-cd ~/.local/share/fonts
+print_section "Removing nano and cleaning up"
+sudo apt purge -y nano
+sudo apt autoremove -y
 
-echo "==> Downloading FiraCode Nerd Font with curl..."
+print_section "Installing FiraCode Nerd Font"
+FONT_DIR="$HOME/.local/share/fonts"
+mkdir -p "$FONT_DIR"
+cd "$FONT_DIR"
 curl -LO https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
-
-echo "==> Extracting font..."
 unzip -q FiraCode.zip
 rm FiraCode.zip
-
-echo "==> Refreshing font cache..."
 fc-cache -fv > /dev/null
 
-#!/bin/bash
-
-echo "🚀 Setting up Micro as an IDE on Debian..."
-
-echo "📦 Installing dependencies..."
-sudo apt update
-sudo apt install -y git curl fzf ripgrep xclip build-essential
+print_section "Setting up Micro as IDE"
 mkdir -p ~/.config/micro
-echo "⚙️  Writing settings.json..."
 cat > ~/.config/micro/settings.json <<EOF
 {
   "autosave": true,
@@ -60,35 +54,52 @@ cat > ~/.config/micro/settings.json <<EOF
   "pluginchannels": ["default"]
 }
 EOF
-echo "🛠️  Setting Ctrl+P for FZF..."
+
 cat > ~/.config/micro/bindings.json <<EOF
 {
-  "Ctrl-o": "command:save",         // Write Out (Save)
-  "Ctrl-x": "command:quit",         // Exit
-  "Ctrl-w": "command:find",         // Where Is (Search)
-  "Ctrl-\\": "command:replace",     // Replace
-  "Ctrl-k": "command:cut",          // Cut Text
-  "Ctrl-u": "command:paste",        // Uncut (Paste)
-  "Ctrl-g": "command:help",         // Help
-  "Ctrl-c": "command:cursorpos",    // Show Cursor Position
-  "Ctrl-t": "command:togglecomment" // Optional: Toggle comment
+  "Ctrl-o": "command:save",
+  "Ctrl-x": "command:quit",
+  "Ctrl-w": "command:find",
+  "Ctrl-\\\\": "command:replace",
+  "Ctrl-k": "command:cut",
+  "Ctrl-u": "command:paste",
+  "Ctrl-g": "command:help",
+  "Ctrl-c": "command:cursorpos",
+  "Ctrl-t": "command:togglecomment"
 }
 EOF
 
-# 6. Install plugins
-echo "🔌 Installing plugins..."
-micro -plugin install filemanager linter formatter comment snippets jump fzf autocomplete git
+print_section "Installing Micro plugins"
+micro -plugin install filemanager linter formatter comment snippets jump fzf autocomplete git || true
 
-echo "✅ Done! Launch Micro and press Ctrl+P to fuzzy open files."
+print_section "Copying QTerminal settings (if available)"
+if [[ -f qterminal.ini && -f SoftTwilight.colorscheme ]]; then
+    mkdir -p ~/.config/qterminal.org/color-schemes
+    cp qterminal.ini ~/.config/qterminal.org/qterminal.ini
+    cp SoftTwilight.colorscheme ~/.config/qterminal.org/color-schemes/SoftTwilight.colorscheme
+    echo "✅ QTerminal config applied."
+else
+    echo "⚠️  QTerminal config files not found. Skipping."
+fi
 
-echo" Copying Qterminal And Color Scheme :D "
-mkdir ~/.config/qterminal.org/color-schemes
-cp qterminal.ini ~/.config/qterminal.org/qterminal.ini
-cp SoftTwilight.colorscheme ~/.config/qterminal.org/color-schemes/SoftTwilight.colorscheme
-
-echo "Clean Terminal Installed :D"
-echo "Installing Oh My Bash"
+print_section "Installing Oh My Bash"
 bash -c "$(wget https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh -O -)"
-cp .bashrc ~/.bashrc
-echo "Everything is Ready Time To reboot"
-sudo reboot
+
+# Optional: Replace .bashrc if local version exists
+if [[ -f .bashrc ]]; then
+    cp .bashrc ~/.bashrc
+    echo "✅ Custom .bashrc applied."
+else
+    echo "⚠️  .bashrc not found. Using default."
+fi
+
+print_section "Setup Complete"
+
+# Prompt for reboot
+read -p "Would you like to reboot now? (y/N): " confirm
+if [[ $confirm =~ ^[Yy]$ ]]; then
+    echo "Rebooting..."
+    sudo reboot
+else
+    echo "You can reboot later with: sudo reboot"
+fi
